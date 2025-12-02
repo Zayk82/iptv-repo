@@ -1,0 +1,59 @@
+name: update
+
+on:
+  workflow_dispatch: # manual trigger
+  schedule:
+    - cron: '0 0 * * *' # daily at midnight UTC
+
+jobs:
+  main:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1️⃣ Checkout repo
+      - uses: actions/checkout@v3
+
+      # 2️⃣ Set up git user
+      - name: setup git
+        run: |
+          git config user.name "Zayk82[bot]"
+          git config user.email "84861620+Zayk82[bot]@users.noreply.github.com"
+
+      # 3️⃣ Set up Node.js
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+          cache: 'npm'
+
+      # 4️⃣ Install dependencies
+      - name: install dependencies
+        run: npm install
+
+      # 5️⃣ Update internal playlists
+      - name: update internal playlists
+        run: npm run playlist:update --silent
+
+      # 6️⃣ Check playlists
+      - name: check internal playlists
+        run: |
+          npm run playlist:lint
+          npm run playlist:validate
+
+      # 7️⃣ Generate public playlists
+      - name: generate public playlists
+        run: npm run playlist:generate
+
+      # 8️⃣ Generate .api/streams.json
+      - name: generate API streams
+        run: npm run api:generate
+
+      # 9️⃣ Update README.md
+      - name: update readme.md
+        run: npm run readme:update
+
+      # 🔟 Commit and push changes
+      - name: commit and push changes
+        run: |
+          git add streams .api README.md
+          git commit --allow-empty -m "[Bot] Update playlists and streams" || echo "No changes to commit"
+          git push
