@@ -1,4 +1,7 @@
 {
-  "build" : "README.md",
-  "files" : ["./.readme/template.md"]
+  "build": "README.md",
+  "files": [
+    "docs/intro.md",
+    "docs/channels.md"
+  ]
 }
